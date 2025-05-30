@@ -2,125 +2,116 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Mouthful of River – Flow Map</title>
+  <title>Mouthful of River – Concept Map (Concentric)</title>
   <style>
-    body{font-family:"Inter",sans-serif;margin:0;padding:0;display:flex;flex-direction:column;align-items:center;background:#fafafa}
-    h1{margin:1rem 0 0.25rem 0}
-    #graph{width:100%;height:80vh;border:0;background:linear-gradient(180deg,#d0eef7 0%,#a8dff1 60%,#7ac7de 100%);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12)}
-    @media (max-width:600px){h1{font-size:1.25rem}}
+    body{font-family:"Inter",sans-serif;margin:0;padding:0;display:flex;flex-direction:column;align-items:center;background:#f8fcfe}
+    h1{margin:1rem 0 0.25rem 0;font-weight:600;letter-spacing:0.02em}
+    p{margin:0 0 0.75rem 0;font-size:0.9rem;color:#555}
+    #graph{width:100%;max-width:1200px;height:82vh;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.05)}
   </style>
   <script src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js"></script>
 </head>
 <body>
-  <h1>Mouthful of River – Flow Map</h1>
-  <p style="margin:0 0 0.5rem 0;font-size:0.9rem;">Hover a concept to trace how ideas flow downstream into projects & scenes.</p>
+  <h1>Mouthful of River – Concept Map</h1>
+  <p><em>Central film → projects → scenes / organisations → concepts</em></p>
   <div id="graph"></div>
 
   <script>
-    /*========== Nodes ==========*/
+    // ---------- Helper to create node ------------
+    function n(id,label,x,y,size,bg,url,anchor=false){
+      return {id,label,x,y,size,shape:'dot',physics:!anchor,fixed:{x:anchor,y:anchor},color:{background:bg},font:{size:size>24?17:14,bold:size>24},url,originalColor:{background:bg}};
+    }
+
+    // ---------- Nodes ----------------------------
     const nodes = new vis.DataSet([
-      // Central source (now circle)
-      { id:0,label:'Mouthful of River',shape:'dot',size:30,color:{background:'#ffe082',border:'#ffca28'},font:{size:22,bold:true},url:'/blog/mouthful-of-river',originalColor:{background:'#ffe082',border:'#ffca28'}},
+      // Centre (anchored)
+      n(0,'Mouthful of River',0,0,30,'#f7d038','/blog/mouthful-of-river',true),
 
-      // First ring – main projects
-      { id:1,label:'Tayal Listening',shape:'dot',size:22,color:'#2ecc71',url:'/blog/tayal-listening',originalColor:'#2ecc71'},
-      { id:2,label:'Data‑centre Activism',shape:'dot',size:22,color:'#e74c3c',url:'/blog/data-centre-activism',originalColor:'#e74c3c'},
-      { id:3,label:'UK River Rights',shape:'dot',size:22,color:'#3498db',url:'/blog/uk-river-rights',originalColor:'#3498db'},
-      { id:4,label:'Artistic Listening',shape:'dot',size:22,color:'#9b59b6',url:'/blog/artistic-listening',originalColor:'#9b59b6'},
-      { id:5,label:'Scientific Listening',shape:'dot',size:22,color:'#f1c40f',url:'/blog/scientific-listening',originalColor:'#f1c40f'},
+      // First‑ring projects (radius ≈ 300)
+      n(1,'Tayal Listening',0,300,22,'#2ecc71','/blog/tayal-listening'),
+      n(2,'Data‑centre Activism',285,93,22,'#e74c3c','/blog/data-centre-activism'),
+      n(3,'UK River Rights',176,-243,22,'#3498db','/blog/uk-river-rights'),
+      n(4,'Artistic Listening',-176,-243,22,'#9b59b6','/blog/artistic-listening'),
+      n(5,'Scientific Listening',-285,93,22,'#f1c40f','/blog/scientific-listening'),
 
-      // Tayal details
-      { id:11,label:'Tayal Song of Interdependence',shape:'dot',size:14,color:'#27ae60',url:'/blog/tayal-song',originalColor:'#27ae60'},
-      { id:12,label:'Tayal Water Governance',shape:'dot',size:14,color:'#27ae60',url:'/blog/tayal-water-governance',originalColor:'#27ae60'},
-      { id:13,label:'Tsou River Chatbot',shape:'dot',size:14,color:'#27ae60',url:'/blog/tsou-river-chatbot',originalColor:'#27ae60'},
+      // Second‑ring – Tayal cluster (radius ≈ 520)
+      n(11,'Tayal Song',0,520,14,'#27ae60','/blog/tayal-song'),
+      n(12,'Tayal Governance',-110,490,14,'#27ae60','/blog/tayal-water-governance'),
+      n(13,'Tsou Chatbot',110,490,14,'#27ae60','/blog/tsou-river-chatbot'),
 
-      // Data‑centre details
-      { id:21,label:'Tu Nube Seca Mi Río',shape:'dot',size:14,color:'#c0392b',url:'/blog/tu-nube-seca',originalColor:'#c0392b'},
-      { id:22,label:'Le Nuage était…',shape:'dot',size:14,color:'#c0392b',url:'/blog/le-nuage',originalColor:'#c0392b'},
-      { id:23,label:'WaterWatch Oregon',shape:'dot',size:14,color:'#c0392b',url:'/blog/waterwatch-oregon',originalColor:'#c0392b'},
+      // Data‑centre activism cluster (spread)
+      n(21,'Tu Nube Seca',515,220,14,'#c0392b','/blog/tu-nube-seca'),
+      n(22,'Le Nuage…',565,160,14,'#c0392b','/blog/le-nuage'),
+      n(23,'WaterWatch OR',455,160,14,'#c0392b','/blog/waterwatch-oregon'),
 
-      // UK river rights details
-      { id:31,label:'River Ouse Legal Rights',shape:'dot',size:14,color:'#2980b9',url:'/blog/river-ouse-rights',originalColor:'#2980b9'},
-      { id:32,label:'River Don Chatbot',shape:'dot',size:14,color:'#2980b9',url:'/blog/river-don-chatbot',originalColor:'#2980b9'},
-      { id:33,label:'Living Stewardship Agreement',shape:'dot',size:14,color:'#2980b9',url:'/blog/living-stewardship',originalColor:'#2980b9'},
+      // UK rights cluster
+      n(31,'River Ouse Rights',330,-410,14,'#2980b9','/blog/river-ouse-rights'),
+      n(32,'River Don Chatbot',380,-460,14,'#2980b9','/blog/river-don-chatbot'),
+      n(33,'Living Stewardship',280,-460,14,'#2980b9','/blog/living-stewardship'),
 
-      // Artistic details
-      { id:41,label:'CLAMS Sculpture',shape:'dot',size:14,color:'#8e44ad',url:'/blog/clams-sculpture',originalColor:'#8e44ad'},
-      { id:42,label:'Amor Núñez – CORPUS AQUAE',shape:'dot',size:14,color:'#8e44ad',url:'/blog/corpus-aquae',originalColor:'#8e44ad'},
-      { id:43,label:'Generative River Score',shape:'dot',size:14,color:'#8e44ad',url:'/blog/generative-score',originalColor:'#8e44ad'},
+      // Artistic cluster
+      n(41,'CLAMS Sculpture',-380,-460,14,'#8e44ad','/blog/clams-sculpture'),
+      n(42,'Amor Núñez AQUAE',-280,-460,14,'#8e44ad','/blog/corpus-aquae'),
+      n(43,'Generative Score',-330,-410,14,'#8e44ad','/blog/generative-score'),
 
-      // Scientific details
-      { id:51,label:'Dr Atakan Aral Networks',shape:'dot',size:14,color:'#d4ac0d',url:'/blog/atakan-aral',originalColor:'#d4ac0d'},
-      { id:52,label:'Hydrophones Expedition',shape:'dot',size:14,color:'#d4ac0d',url:'/blog/hydrophones-taiwan',originalColor:'#d4ac0d'},
+      // Scientific cluster
+      n(51,'Dr Atakan Aral',-515,220,14,'#d4ac0d','/blog/atakan-aral'),
+      n(52,'Hydrophones Taiwan',-455,160,14,'#d4ac0d','/blog/hydrophones-taiwan'),
 
-      // Conceptual nodes (outer ring) – now circles too
-      { id:101,label:'More‑than‑Human Alignment',shape:'dot',size:20,color:'#ff7f0e',font:{bold:true},url:'/blog/ai-alignment-more-than-human',originalColor:'#ff7f0e'},
-      { id:102,label:'Plurality / Digital Democracy',shape:'dot',size:20,color:'#16a085',font:{bold:true},url:'/blog/plural-digital-democracy',originalColor:'#16a085'}
+      // Concept nodes – third ring (anchored to right)
+      n(101,'More‑than‑Human Alignment',700,-120,24,'#ff7f0e','/blog/ai-alignment-more-than-human',true),
+      n(102,'Plurality / Digital Democracy',700,120,24,'#16a085','/blog/plural-digital-democracy',true)
     ]);
 
-    /*========== Edges ==========*/
+    // ---------- Edges ----------------------------
     const edges = new vis.DataSet([
-      {from:0,to:1,width:2,smooth:{type:'continuous'}},
-      {from:0,to:2,width:2,smooth:{type:'continuous'}},
-      {from:0,to:3,width:2,smooth:{type:'continuous'}},
-      {from:0,to:4,width:2,smooth:{type:'continuous'}},
-      {from:0,to:5,width:2,smooth:{type:'continuous'}},
-      // Tayal tributaries
-      {from:1,to:11,width:1},{from:1,to:12,width:1},{from:1,to:13,width:1},
-      // Data‑centre tributaries
-      {from:2,to:21,width:1},{from:2,to:22,width:1},{from:2,to:23,width:1},
-      // UK river rights
-      {from:3,to:31,width:1},{from:3,to:32,width:1},{from:3,to:33,width:1},
-      // Artistic listening
-      {from:4,to:41,width:1},{from:4,to:42,width:1},{from:4,to:43,width:1},
-      // Scientific listening
-      {from:5,to:51,width:1},{from:5,to:52,width:1}
+      // Centre to first ring
+      {from:0,to:1,arrows:'to',width:2},{from:0,to:2,arrows:'to',width:2},{from:0,to:3,arrows:'to',width:2},{from:0,to:4,arrows:'to',width:2},{from:0,to:5,arrows:'to',width:2},
+      // First ring to second ring
+      {from:1,to:11,arrows:'to'},{from:1,to:12,arrows:'to'},{from:1,to:13,arrows:'to'},
+      {from:2,to:21,arrows:'to'},{from:2,to:22,arrows:'to'},{from:2,to:23,arrows:'to'},
+      {from:3,to:31,arrows:'to'},{from:3,to:32,arrows:'to'},{from:3,to:33,arrows:'to'},
+      {from:4,to:41,arrows:'to'},{from:4,to:42,arrows:'to'},{from:4,to:43,arrows:'to'},
+      {from:5,to:51,arrows:'to'},{from:5,to:52,arrows:'to'}
     ]);
 
-    /*========== Layout & Physics ==========*/
+    // ---------- Network --------------------------
     const container=document.getElementById('graph');
     const data={nodes,edges};
     const options={
-      interaction:{hover:true,zoomView:true,dragView:true,tooltipDelay:100},
       physics:{
         enabled:true,
-        solver:'forceAtlas2Based',
-        forceAtlas2Based:{springLength:220,gravitationalConstant:-120},
-        minVelocity:0.75,
-        stabilization:{iterations:250},
+        barnesHut:{
+          gravitationalConstant:-2500,
+          centralGravity:0.2,
+          springLength:160,
+          springConstant:0.015,
+          damping:0.3
+        },
+        minVelocity:0.5,
+        solver:'barnesHut'
       },
-      edges:{color:{color:'#0e385b'},smooth:{type:'cubicBezier',roundness:0.4}},
-      nodes:{borderWidth:0,font:{color:'#0e385b'}}
+      interaction:{hover:true,dragNodes:true,zoomView:true,dragView:true},
+      edges:{smooth:{type:'cubicBezier',roundness:0.4},color:'#666'}
     };
     const network=new vis.Network(container,data,options);
 
-    /*========== Click opens URL ==========*/
-    network.on('click',p=>{if(p.nodes.length){const n=nodes.get(p.nodes[0]);if(n.url)window.open(n.url,'_blank');}});
+    // ---------- Click → open URL ------------------
+    network.on('click',params=>{
+      if(params.nodes.length){const n=nodes.get(params.nodes[0]);if(n.url)window.open(n.url,'_blank');}
+    });
 
-    /*========== Hover-highlight for concepts ==========*/
+    // ---------- Highlight logic -------------------
     const conceptLinks={
       101:[32,33,51,13,11,41,42,43],
       102:[23,21,22,31,32,33,12,13]
     };
     let dimmed=false;
-    function dimAll(){
-      nodes.forEach(n=>nodes.update({id:n.id,color:{background:'#b6d7e1'},font:{color:'#8cb3bd'}}));
-      dimmed=true;
-    }
-    function restoreAll(){
-      nodes.forEach(n=>nodes.update({id:n.id,color:n.originalColor,font:{color:'#0e385b'}}));
-      dimmed=false;
-    }
-    function highlight(id){
-      if(!conceptLinks[id])return;
-      if(!dimmed)dimAll();
-      [id,...conceptLinks[id],0,1,2,3,4,5].forEach(t=>{
-        const n=nodes.get(t);
-        nodes.update({id:t,color:n.originalColor,font:{color:'#0e385b'}});
-      });
-    }
-    network.on('hoverNode',p=>{if(conceptLinks[p.node])highlight(p.node);});
-    network.on('blurNode',p=>{if(conceptLinks[p.node])restoreAll();});
+    function dimAll(){nodes.update(nodes.get().map(n=>({id:n.id,color:{background:'#ecf0f1'},font:{color:'#bdc3c7'}})));dimmed=true;}
+    function restore(){nodes.update(nodes.get().map(n=>({id:n.id,color:n.originalColor,font:{color:'#000'}})));dimmed=false;}
+    function highlight(cid){if(!dimmed)dimAll();const ids=[cid,...conceptLinks[cid]];nodes.update(ids.map(id=>({id,color:nodes.get(id).originalColor,font:{color:'#000'}})));}
+    network.on('hoverNode',e=>{if(conceptLinks[e.node])highlight(e.node);});
+    network.on('blurNode',e=>{if(conceptLinks[e.node])restore();});
   </script>
 </body>
 </html>
